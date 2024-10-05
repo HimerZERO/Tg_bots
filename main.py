@@ -15,30 +15,34 @@ bot = Bot(token=my_token)
 dp = Dispatcher()
 
 
-@dp.message(Command(commands=['start']))
 async def process_start(message: Message) -> None:
     await bot.send_message(message.chat.id, "Hello, my new friend. I can"
                            " help you with your tasks")
 
 
-@dp.message(Command(commands=['help']))
 async def process_help(message: Message) -> None:
     await bot.send_message(message.chat.id, "If you send me a text, I"
                            " will send it is you")
 
 
-@dp.message(Command(commands=['cat']))
 async def sendPhoto_cat(message: Message) -> None:
     cat_response: requests.Response = requests.get(cat_api)
-    assert cat_response == 200
-    cat_link: str = cat_response.json()[0]['url']
-    await bot.send_photo(message.chat.id, cat_link)
+    print(cat_response.status_code)
+    if cat_response.status_code == 200:
+        cat_link: str = cat_response.json()[0]['url']
+        await bot.send_photo(message.chat.id, cat_link)
+    else:
+        await bot.send_message(message.chat.id, str(cat_response.status_code))
 
 
-@dp.message()
 async def send_it(message: Message) -> None:
     await bot.send_message(message.chat.id, message.text)
 
+
+dp.message.register(process_start, Command(commands="start"))
+dp.message.register(process_help, Command(commands="help"))
+dp.message.register(sendPhoto_cat, Command(commands="cat"))
+dp.message.register(send_it)
 
 if __name__ == "__main__":
     dp.run_polling(bot)
