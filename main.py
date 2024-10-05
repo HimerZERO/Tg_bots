@@ -1,3 +1,4 @@
+from aiogram import F
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -32,17 +33,30 @@ async def sendPhoto_cat(message: Message) -> None:
         cat_link: str = cat_response.json()[0]['url']
         await bot.send_photo(message.chat.id, cat_link)
     else:
-        await bot.send_message(message.chat.id, str(cat_response.status_code))
+        await bot.send_photo(message.chat.id,
+                             f'https://http.cat/{cat_response.status_code}')
 
 
-async def send_it(message: Message) -> None:
+async def send_text(message: Message) -> None:
+    assert message.text
     await bot.send_message(message.chat.id, message.text)
+
+
+async def send_sticker(message: Message) -> None:
+    assert message.sticker
+    await bot.send_sticker(message.chat.id, message.sticker.file_id,
+                           reply_to_message_id=message.message_id)
+
+
+async def send_sorry():
+    pass
 
 
 dp.message.register(process_start, Command(commands="start"))
 dp.message.register(process_help, Command(commands="help"))
 dp.message.register(sendPhoto_cat, Command(commands="cat"))
-dp.message.register(send_it)
+dp.message.register(send_text, F.text)
+dp.message.register(send_sticker, F.sticker)
 
 if __name__ == "__main__":
     dp.run_polling(bot)
