@@ -1,3 +1,5 @@
 venv/
 passwords/
 messages.sys
+sub.py
+.gitignore

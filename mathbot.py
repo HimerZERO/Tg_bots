@@ -10,6 +10,8 @@ with open("passwords/url_api.tg", 'r', encoding="utf-8") as fp:
     tg_api: str = fp.read()
 with open("passwords/url_api.cat", 'r', encoding="utf-8") as fp:
     cat_api: str = fp.read()
+with open("passwords/admines_names", 'r', encoding="utf-8") as fp:
+    admins: list[str] = fp.read().split('\n')
 timeout = 30
 
 bot = Bot(token=my_token)
@@ -17,8 +19,10 @@ dp = Dispatcher()
 
 
 async def process_start(message: Message) -> None:
-    await bot.send_message(message.chat.id, "Hello, my new friend. I can"
-                           " help you with your tasks")
+    await bot.send_message(message.chat.id, f"Привет,\
+                           {message.chat.first_name} {message.chat.last_name}!\
+                           Пока что мало что умею мало что, но я стремлюсь к\
+                           этому! Действующие фуннции смотреть в \\help.")
 
 
 async def process_help(message: Message) -> None:
