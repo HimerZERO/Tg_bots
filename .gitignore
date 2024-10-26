@@ -1,5 +1,8 @@
+.env
+
+.mypy_cache/
+.vscode/
 venv/
-passwords/
 messages.sys
-sub.py
-.gitignore
+for_users/
+__pycache__/
