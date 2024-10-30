@@ -4,12 +4,15 @@ import logging.config
 
 from aiogram import F
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command
+from aiogram.fsm.storage.redis import RedisStorage, Redis
 from aiogram.types import Message
-from config_data.config import config
+from config_data.config import Config, load_config
 import handlers
 import requests
 import os
+
+import handlers.general
 
 
 async def process_help(message: Message, bot: Bot) -> None:
@@ -58,14 +61,26 @@ async def main():
     )
     logger.info('Starting bot')
 
+    config: Config = load_config()
+
+    redis = Redis(host='localhost')
+
+    storage = RedisStorage(redis=redis)
+
     my_token = config.bot.token
     cat_api = config.urls["CAT_API"]
     tg_api = config.urls["TG_API"]
     http_cat = config.urls["HTTP_CAT"]
     admins = config.bot.admins
 
+    logger.info(admins)
+
     bot = Bot(token=my_token)
-    dp = Dispatcher()
+    dp = Dispatcher(storage=storage)
+
+    dp.include_router(handlers.general.router)
+    dp.include_router(handlers.admin.router)
+    dp.include_router(handlers.user.router)
 
     dp.workflow_data.update({
             "cat_api": cat_api,
@@ -74,14 +89,9 @@ async def main():
             "admins": admins,
         }
     )
-    dp.message.register(handlers.user.process_start, CommandStart())
-    dp.message.register(process_help, Command(commands="help"))
-    dp.message.register(handlers.user.sendPhoto_cat, Command(commands="cat"))
+    # dp.message.register(process_help, Command(commands="help"))
     dp.message.register(start_to_solved, lambda x: x.text == "/solved")
     dp.message.register(solved, Command(commands="solved"))
-    dp.message.register(handlers.user.send_text, F.text)
-    dp.message.register(handlers.user.send_photo, F.photo)
-    dp.message.register(handlers.user.send_sticker, F.sticker)
 
     await dp.start_polling(bot)
 

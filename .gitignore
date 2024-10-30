@@ -6,3 +6,4 @@ venv/
 messages.sys
 for_users/
 __pycache__/
+*.json
